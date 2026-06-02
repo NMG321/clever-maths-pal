@@ -221,7 +221,10 @@ function Index() {
               className="w-full"
               size="lg"
               onClick={start}
-              disabled={(mode === "normal" && enabledTopics.length === 0) || (mode === "flagged" && flagged.length === 0)}
+              disabled={
+                (mode === "normal" && !randomTopics && enabledTopics.length === 0) ||
+                (mode === "flagged" && flagged.length === 0)
+              }
             >
               Start test
             </Button>
