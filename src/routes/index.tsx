@@ -70,20 +70,34 @@ function Index() {
   }, [stage]);
 
   const topicsLabel = useMemo(
-    () => enabledTopics.map((t) => TOPIC_LABELS[t]).join(", "),
-    [enabledTopics],
+    () => testTopics.map((t) => TOPIC_LABELS[t]).join(", "),
+    [testTopics],
   );
+
+  function pickRandomTopics(): Topic[] {
+    const count = randInt(2, 5);
+    const shuffled = [...ALL_TOPICS].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  }
+
+  function randInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
   function start() {
     let qs: Question[] = [];
+    let activeTopics: Topic[] = [];
     if (mode === "flagged") {
       if (flagged.length === 0) return;
       const pool = [...flagged];
       for (let i = 0; i < count; i++) qs.push(pool[i % pool.length]);
+      activeTopics = Array.from(new Set(qs.map((q) => q.topic)));
     } else {
-      if (enabledTopics.length === 0) return;
-      for (let i = 0; i < count; i++) qs.push(makeQuestion(enabledTopics, difficulty));
+      activeTopics = randomTopics ? pickRandomTopics() : enabledTopics;
+      if (activeTopics.length === 0) return;
+      for (let i = 0; i < count; i++) qs.push(makeQuestion(activeTopics, difficulty));
     }
+    setTestTopics(activeTopics);
     setQuestions(qs);
     setAttempts([]);
     setIdx(0);
