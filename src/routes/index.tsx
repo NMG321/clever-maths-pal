@@ -181,8 +181,26 @@ function Index() {
                 </div>
 
                 <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="random-topics"
+                      checked={randomTopics}
+                      onCheckedChange={(v) => setRandomTopics(v === true)}
+                    />
+                    <Label htmlFor="random-topics" className="cursor-pointer text-sm font-medium">
+                      Random topics
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Pick a surprise mix of topics instead of using your settings.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
                   <Label>Active topics</Label>
-                  {enabledTopics.length === 0 ? (
+                  {randomTopics ? (
+                    <p className="text-sm text-muted-foreground">A random mix will be chosen when you start.</p>
+                  ) : enabledTopics.length === 0 ? (
                     <p className="text-sm text-destructive">
                       No topics enabled.{" "}
                       <Link to="/settings" className="underline">Open settings</Link> to pick some.
@@ -190,9 +208,11 @@ function Index() {
                   ) : (
                     <p className="text-sm text-muted-foreground">{topicsLabel}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Change topics in <Link to="/settings" className="underline">Settings</Link>.
-                  </p>
+                  {!randomTopics && (
+                    <p className="text-xs text-muted-foreground">
+                      Change topics in <Link to="/settings" className="underline">Settings</Link>.
+                    </p>
+                  )}
                 </div>
               </>
             )}
