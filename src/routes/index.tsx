@@ -45,6 +45,8 @@ function Index() {
   const [count, setCount] = useState(10);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [mode, setMode] = useState<Mode>("normal");
+  const [randomTopics, setRandomTopics] = useState(false);
+  const [testTopics, setTestTopics] = useState<Topic[]>([]);
 
   const [enabledTopics, setEnabledTopics] = useState<Topic[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
