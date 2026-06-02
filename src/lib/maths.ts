@@ -38,6 +38,18 @@ export const DEFAULT_SETTINGS: Settings = {
   decimals: 2,
 };
 
+export const ALL_TOPICS: Topic[] = [
+  "add",
+  "subtract",
+  "multiply",
+  "divide",
+  "squares",
+  "sqrt",
+  "powers",
+  "pythagoras",
+  "percentages",
+];
+
 export const TOPIC_LABELS: Record<Topic, string> = {
   add: "Addition (+)",
   subtract: "Subtraction (−)",

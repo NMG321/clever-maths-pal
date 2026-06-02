@@ -8,7 +8,9 @@ import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
+  ALL_TOPICS,
   checkAnswer,
   loadFlags,
   loadSettings,
@@ -43,6 +45,8 @@ function Index() {
   const [count, setCount] = useState(10);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [mode, setMode] = useState<Mode>("normal");
+  const [randomTopics, setRandomTopics] = useState(false);
+  const [testTopics, setTestTopics] = useState<Topic[]>([]);
 
   const [enabledTopics, setEnabledTopics] = useState<Topic[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -66,20 +70,34 @@ function Index() {
   }, [stage]);
 
   const topicsLabel = useMemo(
-    () => enabledTopics.map((t) => TOPIC_LABELS[t]).join(", "),
-    [enabledTopics],
+    () => testTopics.map((t) => TOPIC_LABELS[t]).join(", "),
+    [testTopics],
   );
+
+  function pickRandomTopics(): Topic[] {
+    const count = randInt(2, 5);
+    const shuffled = [...ALL_TOPICS].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  }
+
+  function randInt(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
   function start() {
     let qs: Question[] = [];
+    let activeTopics: Topic[] = [];
     if (mode === "flagged") {
       if (flagged.length === 0) return;
       const pool = [...flagged];
       for (let i = 0; i < count; i++) qs.push(pool[i % pool.length]);
+      activeTopics = Array.from(new Set(qs.map((q) => q.topic)));
     } else {
-      if (enabledTopics.length === 0) return;
-      for (let i = 0; i < count; i++) qs.push(makeQuestion(enabledTopics, difficulty));
+      activeTopics = randomTopics ? pickRandomTopics() : enabledTopics;
+      if (activeTopics.length === 0) return;
+      for (let i = 0; i < count; i++) qs.push(makeQuestion(activeTopics, difficulty));
     }
+    setTestTopics(activeTopics);
     setQuestions(qs);
     setAttempts([]);
     setIdx(0);
@@ -163,8 +181,26 @@ function Index() {
                 </div>
 
                 <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="random-topics"
+                      checked={randomTopics}
+                      onCheckedChange={(v) => setRandomTopics(v === true)}
+                    />
+                    <Label htmlFor="random-topics" className="cursor-pointer text-sm font-medium">
+                      Random topics
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Pick a surprise mix of topics instead of using your settings.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
                   <Label>Active topics</Label>
-                  {enabledTopics.length === 0 ? (
+                  {randomTopics ? (
+                    <p className="text-sm text-muted-foreground">A random mix will be chosen when you start.</p>
+                  ) : enabledTopics.length === 0 ? (
                     <p className="text-sm text-destructive">
                       No topics enabled.{" "}
                       <Link to="/settings" className="underline">Open settings</Link> to pick some.
@@ -172,9 +208,11 @@ function Index() {
                   ) : (
                     <p className="text-sm text-muted-foreground">{topicsLabel}</p>
                   )}
-                  <p className="text-xs text-muted-foreground">
-                    Change topics in <Link to="/settings" className="underline">Settings</Link>.
-                  </p>
+                  {!randomTopics && (
+                    <p className="text-xs text-muted-foreground">
+                      Change topics in <Link to="/settings" className="underline">Settings</Link>.
+                    </p>
+                  )}
                 </div>
               </>
             )}
@@ -183,7 +221,10 @@ function Index() {
               className="w-full"
               size="lg"
               onClick={start}
-              disabled={(mode === "normal" && enabledTopics.length === 0) || (mode === "flagged" && flagged.length === 0)}
+              disabled={
+                (mode === "normal" && !randomTopics && enabledTopics.length === 0) ||
+                (mode === "flagged" && flagged.length === 0)
+              }
             >
               Start test
             </Button>
